@@ -49,10 +49,10 @@ const PAGES = [
 const SENATOR_PAGE = { id: "senator", label: "Senator 2027 Campaign" };
 
 const IMPACT_STATS = [
-  { value: 30, suffix: "+", label: "Heavy-duty iron sheets delivered to Nyairang'a Primary School", icon: Hammer },
-  { value: 40, suffix: "+", label: "Bags of cement contributed to Metamaywa Secondary sanitation works", icon: Boxes },
-  { value: 500, suffix: "+", label: "Construction bricks supplied for dilapidated ECDE classrooms", icon: School },
-  { value: 3, suffix: "", label: "Electoral wards stabilised through grassroots youth peace mobilisation", icon: ShieldCheck },
+  { value: 1200, suffix: "+", label: "Families supported through bereavement consolations and needy student scholarships", icon: HeartHandshake },
+  { value: 35, suffix: "+", label: "Houses renovated with structural repairs and complete roofing updates", icon: HomeIcon },
+  { value: 15, suffix: "+", label: "ECDE classrooms built, renovated, and equipped with learning books", icon: School },
+  { value: 17, suffix: "", label: "Electoral wards stabilised through grassroots youth peace mobilisation", icon: ShieldCheck },
 ];
 
 const PROJECTS = [
@@ -71,19 +71,19 @@ const PROJECTS = [
   {
     category: "Child Initiatives",
     title: "Support a School Child — West Mugirango Schools",
-    body: "Today, our Support a School Child initiative reached more learners at Sasati Primary School, Nyamira Primary School, Rangenyo Primary School, and Blessed Heart School. Every child deserves an opportunity to learn with dignity, and together we are making that possible — one school at a time. Education remains the greatest investment we can make in our future.",
+    body: "Today, our Support a School Child initiative reached more learners at Sasati Primary School, Nyamira Primary School, Rangenyo Primary School, and Blessed Heart School. Every child deserves an opportunity to learn with dignity, and together we are making that possible, one school at a time. Education remains the greatest investment we can make in our future.",
     image: IMG.g18,
   },
   {
     category: "Family Welfare",
     title: "Building & Renovating Homes Across Nyamira County",
-    body: "Beyond schools, the Foundation walks alongside families in need — building and renovating houses for residents across Nyamira County so that dignity starts at home.",
+    body: "Beyond schools, the Foundation walks alongside families in need by building and renovating houses for residents across Nyamira County so that dignity starts at home.",
     image: IMG.adams1,
   },
   {
     category: "Civic & Youth",
     title: "Kikao na Wananchi — Bosamaro Ward",
-    body: "A grassroots baraza in Bosamaro Ward brought residents together to raise their concerns directly — from infrastructure gaps to youth opportunity — with commitments to follow up made in the open.",
+    body: "A grassroots baraza in Bosamaro Ward brought residents together to raise their concerns directly: from infrastructure gaps to youth opportunity, with commitments to follow up made in the open.",
     image: IMG.g14,
   },
   {
@@ -97,14 +97,14 @@ const PROJECTS = [
 const PROJECT_FILTERS = ["All", "School Infrastructure", "Family Welfare", "Civic & Youth", "Child Initiatives"];
 
 const GALLERY_PHOTOS = [
-  IMG.g17,
-  IMG.g11,
-  IMG.g16,
-  IMG.g8,
-  IMG.g12,
-  IMG.g2,
-  IMG.g7,
-  IMG.g18,
+  { image: IMG.g17, info: "Adams showing up to support Nyamira teams competing in the national sports." },
+  { image: IMG.g11, info: "Adams joining Matiang'i team in Bobasi for campaigns." },
+  { image: IMG.g16, info: "Adams showing up to support Nyamira teams competing in the national sports." },
+  { image: IMG.g8, info: "Adams listening to local voices during a public community meeting." },
+  { image: IMG.g12, info: "Adams supporter joining the Alternative Opposition campaign." },
+  { image: IMG.g2, info: "Senator Adams joins the foundation members in house renovating as part of the humanitarian work." },
+  { image: IMG.g7, info: "Senator Adams joins members of Metamaywa SDA for church choir contribution" },
+  { image: IMG.g18, info: "Learners receiving encouragement and support through the Support a School Child initiative." },
 ];
 
 const GALLERY_VIDEOS = [
@@ -139,7 +139,7 @@ const NEWS = [
     title: "Grassroots Fellowship Across Nyamira Wards",
     date: "Nyamira County",
     image: IMG.g7,
-    body: "From community halls to church fellowships, Adams continues to meet residents where they already gather — listening first, speaking second.",
+    body: "From community halls to church fellowships, Adams continues to meet residents where they already gather: listening first, speaking second.",
   },
   {
     category: "Education",
@@ -161,7 +161,7 @@ const AGENDAS = [
   {
     icon: Users,
     title: "Kuwa Karibu na Watu",
-    body: "Working closely with the people and staying near the ground — through barazas, kamukunjis, and open door-to-door conversations — so that Nyamira's real issues reach the Senate floor, not a filtered version of them.",
+    body: "Working closely with the people and staying near the ground; through barazas, kamukunjis, and open door-to-door conversations.This will capacitate Nyamira's real issues reach the Senate floor, not a filtered version of them.",
   },
   {
     icon: Landmark,
@@ -194,7 +194,7 @@ const MANIFESTO = [
   {
     icon: Landmark,
     title: "County Budget Accountability",
-    body: "Strict legislative oversight of county funds to end stalled local projects — every allocation tracked from budget line to completed handover.",
+    body: "Strict legislative oversight of county funds to end stalled local projects, every allocation tracked from budget line to completed handover.",
   },
 ];
 
@@ -339,7 +339,7 @@ function NavBar({ page, setPage }) {
 /* ============================================================
    MOTION HERO (Home page)
    ============================================================ */
-function MotionHero({ setPage }) {
+function MotionHero({ navigate }) {
   const wrapRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const reduced = useRef(prefersReducedMotion());
@@ -429,10 +429,10 @@ function MotionHero({ setPage }) {
                 pointerEvents: ctaOpacity > 0.5 ? "auto" : "none",
               }}
             >
-              <button className="btn btn-gold" onClick={() => setPage("senator")}>
+              <button className="btn btn-gold" onClick={() => navigate("senator")}>
                 Partner With Us <ArrowRight size={16} />
               </button>
-              <button className="btn btn-outline" onClick={() => setPage("projects")}>
+              <button className="btn btn-outline" onClick={() => navigate("projects")}>
                 Explore Our Impact
               </button>
             </div>
@@ -441,7 +441,9 @@ function MotionHero({ setPage }) {
 
         <div className="hero-scroll-hint" style={{ opacity: 1 - p1 }}>
           <span>Scroll</span>
-          <div className="hero-scroll-line" />
+          <div className="hero-scroll-mouse" aria-hidden="true">
+            <span />
+          </div>
         </div>
       </div>
     </div>
@@ -486,7 +488,7 @@ function ImpactDashboard() {
 /* ============================================================
    FOUNDER'S CORNER
    ============================================================ */
-function FoundersCorner({ setPage }) {
+function FoundersCorner({ navigate }) {
   return (
     <section className="section founder-section">
       <div className="founder-grid">
@@ -500,7 +502,7 @@ function FoundersCorner({ setPage }) {
             Long before any campaign, Adams Mochenwa was already showing up in Nyamira's
             villages with iron sheets, cement, and bricks in hand. In 2022, rather than pour
             campaign funds into billboards, he famously used a donkey to transport his IEBC
-            clearance materials — a small, deliberate choice that freed up funds to go straight
+            clearance materials: a small, deliberate choice that freed up funds to go straight
             into charity instead of political theatre.
           </p>
           <p>
@@ -508,7 +510,7 @@ function FoundersCorner({ setPage }) {
             separate timelines, so communities are never left waiting for the next election
             cycle to receive help they need now.
           </p>
-          <button className="link-cta" onClick={() => setPage("senator")}>
+          <button className="link-cta" onClick={() => navigate("senator")}>
             See the Senator 2027 vision <ArrowRight size={16} />
           </button>
         </div>
@@ -520,12 +522,12 @@ function FoundersCorner({ setPage }) {
 /* ============================================================
    HOME PAGE
    ============================================================ */
-function HomePage({ setPage }) {
+function HomePage({ navigate }) {
   return (
     <>
-      <MotionHero setPage={setPage} />
+      <MotionHero navigate={navigate} />
       <ImpactDashboard />
-      <FoundersCorner setPage={setPage} />
+      <FoundersCorner navigate={navigate} />
     </>
   );
 }
@@ -545,19 +547,19 @@ function AboutPage() {
           <h2>From Ikonge's tea farms to Nyamira's frontline of service</h2>
           <p>
             Adams Mochenwa was raised in the Ikonge area, in a home that depended on the family's
-            tea and dairy farming — his parents were peasant farmers, and his father served the
+            tea and dairy farming: his parents were peasant farmers, and his father served the
             community as a pastor. It was a modest, hardworking upbringing, the kind that teaches
             patience and service before it teaches anything else.
           </p>
           <p>
             He went on to university to study engineering, then pushed further into technology,
             building expertise in artificial intelligence. Rather than leaving Nyamira behind, he
-            turned that growth outward — channelling what he had learned and earned back into his
+            turned that growth outward by channelling what he had learned and earned back into his
             home community through the Foundation's work.
           </p>
           <p>
             In 2022, he made his first attempt at elected office, vying for the Nyamira County
-            Senate seat without success. That setback didn't end the work — it sharpened it,
+            Senate seat without success. That setback didn't end the work, it sharpened it,
             shaping the disciplined, ground-level approach the Foundation and the 2027 campaign
             both carry today.
           </p>
@@ -645,6 +647,17 @@ function useFormState(initial) {
    GALLERY PAGE
    ============================================================ */
 function GalleryPage() {
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+
+  useEffect(() => {
+    if (!selectedPhoto) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setSelectedPhoto(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedPhoto]);
+
   return (
     <div className="page-pad">
       <section className="section">
@@ -653,13 +666,42 @@ function GalleryPage() {
           <h2>Moments from the ground in Nyamira</h2>
         </div>
         <div className="gallery-grid">
-          {GALLERY_PHOTOS.map((src, i) => (
-            <div className="gallery-item" key={i}>
-              <img src={src} alt={`Bwatesia Mochenwa Foundation gallery photo ${i + 1}`} />
-            </div>
+          {GALLERY_PHOTOS.map((photo, i) => (
+            <button
+              className="gallery-item"
+              key={i}
+              type="button"
+              onClick={() => setSelectedPhoto(photo)}
+              aria-label={`Open gallery photo ${i + 1}: ${photo.info}`}
+            >
+              <img src={photo.image} alt={photo.info} />
+            </button>
           ))}
         </div>
       </section>
+
+      {selectedPhoto && (
+        <div className="gallery-modal" role="dialog" aria-modal="true" aria-label="Gallery photo">
+          <button
+            className="gallery-modal-backdrop"
+            type="button"
+            aria-label="Close photo"
+            onClick={() => setSelectedPhoto(null)}
+          />
+          <div className="gallery-modal-content">
+            <button
+              className="gallery-modal-close"
+              type="button"
+              aria-label="Close photo"
+              onClick={() => setSelectedPhoto(null)}
+            >
+              <X size={22} />
+            </button>
+            <img src={selectedPhoto.image} alt={selectedPhoto.info} />
+            <p>{selectedPhoto.info}</p>
+          </div>
+        </div>
+      )}
 
       <section className="section">
         <div className="section-head">
@@ -916,8 +958,7 @@ function Footer({ setPage }) {
       </div>
 
       <div className="footer-bottom">
-        This is for informational purposes only. For medical advice or diagnosis, consult a
-        professional. AI responses may include mistakes.
+        Paid for and authorised by the Senator Adams Foundation & Campaign. This website is for informational and civic-engagement purposes. 
       </div>
     </footer>
   );
@@ -930,6 +971,11 @@ export default function App() {
   const [page, setPage] = useState("home");
   const [toast, setToast] = useState(null);
 
+  const navigate = (nextPage) => {
+    setPage(nextPage);
+    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  };
+
   const showToast = useCallback((msg) => {
     setToast(msg);
     window.clearTimeout(showToast._t);
@@ -937,7 +983,7 @@ export default function App() {
   }, []);
 
   let PageComp;
-  if (page === "home") PageComp = <HomePage setPage={setPage} />;
+  if (page === "home") PageComp = <HomePage navigate={navigate} />;
   else if (page === "about") PageComp = <AboutPage />;
   else if (page === "projects") PageComp = <ProjectsPage />;
   else if (page === "gallery") PageComp = <GalleryPage />;
@@ -948,9 +994,9 @@ export default function App() {
     <ToastCtx.Provider value={showToast}>
       <div className="app-root">
         <style>{CSS}</style>
-        <NavBar page={page} setPage={setPage} />
+        <NavBar page={page} setPage={navigate} />
         <main>{PageComp}</main>
-        <Footer setPage={setPage} />
+        <Footer setPage={navigate} />
         <ToastHost toast={toast} />
       </div>
     </ToastCtx.Provider>
@@ -995,9 +1041,9 @@ input,select,textarea{font-family:inherit;}
 .nav-shell{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(247,246,241,.78);border-bottom:1px solid var(--line);}
 .nav-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.5rem;}
 .brand{display:flex;align-items:center;gap:.6rem;background:none;border:none;padding:0;}
-.brand-logo{height:42px;width:auto;display:block;}
+.brand-logo{height:50px;width:auto;display:block;}
 .footer-logo-wrap{display:inline-block;background:var(--paper);padding:.7rem 1.1rem;border-radius:var(--radius-m);margin-bottom:1.1rem;}
-.footer-logo{height:34px;width:auto;display:block;}
+.footer-logo{height:58px;width:auto;display:block;}
 .nav-links{display:none;align-items:center;gap:1.6rem;}
 .nav-link{background:none;border:none;font-size:.92rem;color:var(--charcoal-60);padding:.3rem 0;border-bottom:2px solid transparent;}
 .nav-link.active{color:var(--emerald-800);border-color:var(--emerald-700);}
@@ -1016,7 +1062,7 @@ input,select,textarea{font-family:inherit;}
 .hero-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:linear-gradient(180deg,var(--emerald-950),var(--emerald-800));}
 .hero-bg{position:absolute;inset:0;background:radial-gradient(circle at 75% 20%, rgba(204,154,61,.18), transparent 55%);}
 .hero-grid{position:relative;z-index:2;max-width:1240px;margin:0 auto;height:100%;display:grid;grid-template-columns:1fr;align-items:center;gap:1rem;padding:3.5rem 1.5rem;}
-.hero-portrait{width:min(78vw,320px);aspect-ratio:3/4;margin:0 auto;position:relative;overflow:hidden;justify-self:center;}
+.hero-portrait{width:min(78vw,320px);aspect-ratio:3/4;margin:4rem auto 0;position:relative;overflow:hidden;justify-self:center;}
 .hero-portrait img{width:100%;height:100%;object-fit:cover;display:block;}
 .hero-portrait-frame{position:absolute;inset:0;border:1.5px solid rgba(204,154,61,.55);pointer-events:none;}
 .hero-copy{color:#F7F6F1;text-align:center;max-width:640px;margin:1.5rem auto 0;}
@@ -1025,11 +1071,13 @@ input,select,textarea{font-family:inherit;}
 .hero-copy .hero-eyebrow .dot{color:var(--gold-500);}
 .hero-copy .hero-sub{color:#FFFFFF;font-size:1.02rem;max-width:520px;margin:0 auto;}
 .hero-cta-row{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap;margin-top:2.4rem;padding-bottom:1.2rem;}
-.hero-scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;color:rgba(247,246,241,.6);font-size:.72rem;letter-spacing:.08em;}
-.hero-scroll-line{width:1px;height:30px;background:linear-gradient(180deg,rgba(247,246,241,.7),transparent);}
+.hero-scroll-hint{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.45rem;color:rgba(247,246,241,.78);font-size:.72rem;letter-spacing:.08em;}
+.hero-scroll-mouse{width:19px;height:30px;border:1.5px solid rgba(247,246,241,.78);border-radius:999px;display:flex;justify-content:center;padding-top:5px;}
+.hero-scroll-mouse span{width:3px;height:6px;border-radius:999px;background:var(--gold-500);animation:scrollMouseBounce 1.4s ease-in-out infinite;}
+@keyframes scrollMouseBounce{0%,100%{transform:translateY(0);opacity:.55;}50%{transform:translateY(8px);opacity:1;}}
 @media(min-width:900px){
   .hero-grid{grid-template-columns:.9fr 1.1fr;text-align:left;}
-  .hero-portrait{justify-self:start;width:340px;}
+  .hero-portrait{justify-self:start;width:340px;margin:0;}
   .hero-copy{text-align:left;margin:0;}
   .hero-cta-row{justify-content:flex-start;}
   .hero-sub{margin:0;}
@@ -1113,9 +1161,17 @@ input,select,textarea{font-family:inherit;}
 .gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;}
 @media(min-width:700px){.gallery-grid{grid-template-columns:repeat(3,1fr);}}
 @media(min-width:1040px){.gallery-grid{grid-template-columns:repeat(4,1fr);}}
-.gallery-item{border-radius:var(--radius-m);overflow:hidden;aspect-ratio:1/1;border:1px solid var(--line);transition:border-color .25s ease, box-shadow .25s ease, transform .25s ease;}
+.gallery-item{display:block;width:100%;padding:0;border-radius:var(--radius-m);overflow:hidden;aspect-ratio:1/1;border:1px solid var(--line);background:#fff;cursor:pointer;transition:border-color .25s ease, box-shadow .25s ease, transform .25s ease;}
 .gallery-item:hover{border-color:var(--gold-500);box-shadow:0 0 0 1px rgba(204,154,61,.4), 0 22px 44px -12px rgba(204,154,61,.35);transform:translateY(-3px);}
 .gallery-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.gallery-item:focus-visible{outline:2px solid var(--gold-500);outline-offset:3px;}
+.gallery-modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:1.2rem;}
+.gallery-modal-backdrop{position:absolute;inset:0;border:0;background:rgba(11,42,32,.82);cursor:pointer;}
+.gallery-modal-content{position:relative;z-index:1;width:min(100%,900px);max-height:calc(100vh - 2.4rem);padding:1rem;background:var(--paper);border-radius:var(--radius-m);box-shadow:0 24px 80px rgba(0,0,0,.35);}
+.gallery-modal-content img{display:block;width:100%;max-height:70vh;object-fit:contain;background:var(--emerald-950);border-radius:var(--radius-s);}
+.gallery-modal-content p{padding:.9rem .25rem .1rem;color:var(--charcoal);font-size:.95rem;}
+.gallery-modal-close{position:absolute;top:1.45rem;right:1.45rem;z-index:2;display:grid;place-items:center;width:2.3rem;height:2.3rem;padding:0;border:0;border-radius:50%;background:rgba(11,42,32,.85);color:#fff;cursor:pointer;}
+.gallery-modal-close:focus-visible{outline:2px solid var(--gold-500);outline-offset:2px;}
 .video-grid{display:grid;grid-template-columns:1fr;gap:1.2rem;}
 @media(min-width:700px){.video-grid{grid-template-columns:repeat(2,1fr);}}
 .video-item{position:relative;display:block;border-radius:var(--radius-m);overflow:hidden;aspect-ratio:16/10;border:1px solid var(--line);transition:border-color .25s ease, box-shadow .25s ease, transform .25s ease;}
