@@ -4,7 +4,7 @@ import {
   ShieldCheck, Sprout, Cpu, FileCheck2, ChevronRight, CheckCircle2,
   Landmark, Users, HeartHandshake, School, Wheat, Hammer, Boxes,
   FileText, Send, Loader2, PlayCircle, ExternalLink, GraduationCap,
-  Home as HomeIcon, Megaphone, Radio, Newspaper
+  Home as HomeIcon, Megaphone, Radio, Newspaper, CreditCard
 } from "lucide-react";
 
 /* ============================================================
@@ -43,6 +43,7 @@ const PAGES = [
   { id: "home", label: "Home" },
   { id: "about", label: "About Adams & Key Agendas" },
   { id: "projects", label: "Our Projects" },
+  { id: "donate", label: "Partner & Donate" },
   { id: "gallery", label: "Gallery" },
   { id: "news", label: "News" },
 ];
@@ -429,7 +430,7 @@ function MotionHero({ navigate }) {
                 pointerEvents: ctaOpacity > 0.5 ? "auto" : "none",
               }}
             >
-              <button className="btn btn-gold" onClick={() => navigate("senator")}>
+              <button className="btn btn-gold" onClick={() => navigate("donate")}>
                 Partner With Us <ArrowRight size={16} />
               </button>
               <button className="btn btn-outline" onClick={() => navigate("projects")}>
@@ -641,6 +642,369 @@ function useFormState(initial) {
   const [errors, setErrors] = useState({});
   const set = (k, v) => setValues((s) => ({ ...s, [k]: v }));
   return { values, set, errors, setErrors };
+}
+
+/* ============================================================
+   DONATE PAGE
+   ============================================================ */
+function MpesaForm() {
+  const toast = useToast();
+  const { values, set, errors, setErrors } = useFormState({ name: "", phone: "", amount: "" });
+  const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    const e = {};
+    if (!values.name.trim()) e.name = "Enter your full name.";
+    if (!/^\+254[17]\d{8}$/.test(values.phone.trim())) {
+      e.phone = "Enter a valid number, e.g. +254712345678.";
+    }
+    const amt = Number(values.amount);
+    if (!values.amount || isNaN(amt) || amt <= 0) e.amount = "Enter an amount in KES greater than 0.";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const submit = (ev) => {
+    ev.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      toast(`STK push sent to ${values.phone}. Complete the payment on your phone to finish.`);
+      set("amount", "");
+    }, 1400);
+  };
+
+  return (
+    <form className="pay-tab-form" onSubmit={submit} noValidate>
+      <label className="field">
+        <span>Full name</span>
+        <input
+          value={values.name}
+          onChange={(e) => set("name", e.target.value)}
+          placeholder="e.g. Jane Nyaboke"
+        />
+        {errors.name && <em className="error">{errors.name}</em>}
+      </label>
+      <label className="field">
+        <span>Phone number</span>
+        <input
+          value={values.phone}
+          onChange={(e) => set("phone", e.target.value)}
+          placeholder="+254712345678"
+        />
+        {errors.phone && <em className="error">{errors.phone}</em>}
+      </label>
+      <label className="field">
+        <span>Amount (KES)</span>
+        <input
+          value={values.amount}
+          onChange={(e) => set("amount", e.target.value)}
+          placeholder="1000"
+          inputMode="numeric"
+        />
+        {errors.amount && <em className="error">{errors.amount}</em>}
+      </label>
+      <button className="btn btn-gold full" disabled={loading} type="submit">
+        {loading ? <Loader2 className="spin" size={16} /> : <Send size={16} />}
+        {loading ? "Sending STK push…" : "Simulate M-Pesa STK Push"}
+      </button>
+      <p className="fine-print">This is a demonstration flow — no real transaction is processed yet. See the setup notes shared with this file to go live.</p>
+    </form>
+  );
+}
+
+/* --- Card (Stripe Checkout) ---
+   Standard, PCI-safe pattern: we never touch card numbers ourselves.
+   The browser calls our own serverless endpoint (/api/create-checkout-session),
+   which uses the secret Stripe key — kept server-side only — to create a
+   Stripe-hosted Checkout Session, then we redirect the browser to Stripe's
+   own payment page. This is the same approach used by most nonprofit sites. */
+function CardForm() {
+  const toast = useToast();
+  const { values, set, errors, setErrors } = useFormState({
+    name: "",
+    email: "",
+    amount: "",
+    currency: "USD",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    const e = {};
+    if (!values.name.trim()) e.name = "Enter your full name.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) e.email = "Enter a valid email for your receipt.";
+    const amt = Number(values.amount);
+    if (!values.amount || isNaN(amt) || amt <= 0) e.amount = "Enter an amount greater than 0.";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const submit = async (ev) => {
+    ev.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: values.amount,
+          currency: values.currency.toLowerCase(),
+          donorName: values.name,
+          donorEmail: values.email,
+        }),
+      });
+      if (!res.ok) throw new Error("Checkout session request failed");
+      const data = await res.json();
+      if (!data.url) throw new Error("No checkout URL returned");
+      window.location.href = data.url;
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      toast("Card payments aren't connected yet — see the setup notes shared with this file.");
+    }
+  };
+
+  return (
+    <form className="pay-tab-form" onSubmit={submit} noValidate>
+      <label className="field">
+        <span>Full name</span>
+        <input value={values.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Jane Doe" />
+        {errors.name && <em className="error">{errors.name}</em>}
+      </label>
+      <label className="field">
+        <span>Email (for your receipt)</span>
+        <input value={values.email} onChange={(e) => set("email", e.target.value)} placeholder="you@email.com" />
+        {errors.email && <em className="error">{errors.email}</em>}
+      </label>
+      <div className="field-row">
+        <label className="field">
+          <span>Amount</span>
+          <input
+            value={values.amount}
+            onChange={(e) => set("amount", e.target.value)}
+            placeholder="50"
+            inputMode="decimal"
+          />
+          {errors.amount && <em className="error">{errors.amount}</em>}
+        </label>
+        <label className="field">
+          <span>Currency</span>
+          <select value={values.currency} onChange={(e) => set("currency", e.target.value)}>
+            <option value="USD">USD ($)</option>
+            <option value="KES">KES (Sh)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="EUR">EUR (€)</option>
+          </select>
+        </label>
+      </div>
+      <button className="btn btn-gold full" disabled={loading} type="submit">
+        {loading ? <Loader2 className="spin" size={16} /> : <CreditCard size={16} />}
+        {loading ? "Redirecting to secure checkout…" : "Donate with Card"}
+      </button>
+      <p className="fine-print">
+        You'll be redirected to Stripe's own secure payment page — we never see or store your card
+        details. Works with cards issued anywhere, including the US.
+      </p>
+    </form>
+  );
+}
+
+/* --- PayPal ---
+   Uses PayPal's official JS SDK "Smart Buttons". The order is created and
+   captured using only the public PayPal Client ID (never a secret), which is
+   PayPal's documented approach for donation buttons — the same one used on
+   most nonprofit donation pages. */
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || "test";
+
+function PaypalPanel() {
+  const toast = useToast();
+  const containerRef = useRef(null);
+  const [amount, setAmount] = useState("25");
+  const [sdkReady, setSdkReady] = useState(Boolean(window.paypal));
+
+  useEffect(() => {
+    if (window.paypal) {
+      setSdkReady(true);
+      return;
+    }
+    const existing = document.getElementById("paypal-sdk");
+    if (existing) {
+      existing.addEventListener("load", () => setSdkReady(true));
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "paypal-sdk";
+    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`;
+    script.async = true;
+    script.onload = () => setSdkReady(true);
+    script.onerror = () => toast("Couldn't load PayPal right now. Please try again later.");
+    document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (!sdkReady || !window.paypal || !containerRef.current) return;
+    containerRef.current.innerHTML = "";
+    const amt = (Number(amount) > 0 ? Number(amount) : 25).toFixed(2);
+
+    window.paypal
+      .Buttons({
+        style: { layout: "vertical", color: "gold", shape: "pill", label: "donate" },
+        createOrder: (data, actions) =>
+          actions.order.create({
+            purchase_units: [
+              {
+                amount: { value: amt, currency_code: "USD" },
+                description: "Donation to the Bwatesia Mochenwa Foundation",
+              },
+            ],
+          }),
+        onApprove: (data, actions) =>
+          actions.order.capture().then((details) => {
+            const givenName = details?.payer?.name?.given_name || "friend";
+            toast(`Thank you, ${givenName}! Your PayPal donation was received.`);
+          }),
+        onError: (err) => {
+          console.error(err);
+          toast("Something went wrong with PayPal. Please try again.");
+        },
+      })
+      .render(containerRef.current);
+  }, [sdkReady, amount]);
+
+  return (
+    <div className="pay-tab-form">
+      <label className="field">
+        <span>Amount (USD)</span>
+        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="25" inputMode="decimal" />
+      </label>
+      <div ref={containerRef} className="paypal-buttons-slot">
+        {!sdkReady && <p className="fine-print">Loading PayPal…</p>}
+      </div>
+      <p className="fine-print">
+        Pay with a PayPal balance, bank account, or any card linked to PayPal — widely used by
+        donors in the US and worldwide.
+      </p>
+    </div>
+  );
+}
+
+function GiveMoneyCard() {
+  const [tab, setTab] = useState("mpesa");
+  const TABS = [
+    { id: "mpesa", label: "M-Pesa" },
+    { id: "card", label: "Card" },
+    { id: "paypal", label: "PayPal" },
+  ];
+  return (
+    <div className="pay-card">
+      <div className="pay-card-head">
+        <span className="pay-badge">Give money</span>
+        <h3>Choose how you'd like to give</h3>
+      </div>
+      <div className="pay-tabs" role="tablist">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            type="button"
+            aria-selected={tab === t.id}
+            className={"pay-tab" + (tab === t.id ? " active" : "")}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tab === "mpesa" && <MpesaForm />}
+      {tab === "card" && <CardForm />}
+      {tab === "paypal" && <PaypalPanel />}
+    </div>
+  );
+}
+
+function MaterialForm() {
+  const toast = useToast();
+  const { values, set, errors, setErrors } = useFormState({
+    name: "",
+    phone: "",
+    material: "Cement",
+    quantity: "",
+  });
+
+  const validate = () => {
+    const e = {};
+    if (!values.name.trim()) e.name = "Enter your full name.";
+    if (!/^\+?\d{9,13}$/.test(values.phone.trim())) e.phone = "Enter a valid phone number.";
+    if (!values.quantity || Number(values.quantity) <= 0) e.quantity = "Enter a quantity greater than 0.";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const submit = (ev) => {
+    ev.preventDefault();
+    if (!validate()) return;
+    toast("Thank you — the Foundation's logistics team will contact you to arrange collection.");
+    set("quantity", "");
+  };
+
+  return (
+    <form className="pay-card outline" onSubmit={submit} noValidate>
+      <div className="pay-card-head">
+        <span className="pay-badge alt">In-kind</span>
+        <h3>Contribute materials</h3>
+      </div>
+      <label className="field">
+        <span>Full name</span>
+        <input value={values.name} onChange={(e) => set("name", e.target.value)} />
+        {errors.name && <em className="error">{errors.name}</em>}
+      </label>
+      <label className="field">
+        <span>Phone number</span>
+        <input value={values.phone} onChange={(e) => set("phone", e.target.value)} placeholder="0712345678" />
+        {errors.phone && <em className="error">{errors.phone}</em>}
+      </label>
+      <label className="field">
+        <span>Material</span>
+        <select value={values.material} onChange={(e) => set("material", e.target.value)}>
+          <option>Cement</option>
+          <option>Iron sheets</option>
+          <option>Bricks</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label className="field">
+        <span>Quantity</span>
+        <input
+          value={values.quantity}
+          onChange={(e) => set("quantity", e.target.value)}
+          placeholder="e.g. 10 bags"
+        />
+        {errors.quantity && <em className="error">{errors.quantity}</em>}
+      </label>
+      <button className="btn btn-outline full" type="submit">
+        Submit Pledge
+      </button>
+    </form>
+  );
+}
+
+function DonatePage() {
+  return (
+    <div className="page-pad">
+      <section className="section">
+        <div className="section-head">
+          <p className="kicker">Partner & donate</p>
+          <h2>Two ways to put resources directly into Nyamira</h2>
+        </div>
+        <div className="donate-grid">
+          <GiveMoneyCard />
+          <MaterialForm />
+        </div>
+      </section>
+    </div>
+  );
 }
 
 /* ============================================================
@@ -982,10 +1346,25 @@ export default function App() {
     showToast._t = window.setTimeout(() => setToast(null), 3600);
   }, []);
 
+  // Handle the redirect Stripe sends the browser back to after checkout.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("payment");
+    if (!status) return;
+    if (status === "success") {
+      showToast("Thank you — your card donation was received!");
+    } else if (status === "cancelled") {
+      showToast("Checkout was cancelled — no charge was made.");
+    }
+    setPage("donate");
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [showToast]);
+
   let PageComp;
   if (page === "home") PageComp = <HomePage navigate={navigate} />;
   else if (page === "about") PageComp = <AboutPage />;
   else if (page === "projects") PageComp = <ProjectsPage />;
+  else if (page === "donate") PageComp = <DonatePage />;
   else if (page === "gallery") PageComp = <GalleryPage />;
   else if (page === "news") PageComp = <NewsPage />;
   else if (page === "senator") PageComp = <SenatorPage />;
@@ -1139,10 +1518,17 @@ input,select,textarea{font-family:inherit;}
 .project-body h3{font-size:1.05rem;margin-bottom:.5rem;}
 .project-body p{font-size:.88rem;}
 
-/* FORMS (Senator volunteer form reuses these) */
+/* FORMS (also reused by the Senator volunteer form) */
+.donate-grid{display:grid;grid-template-columns:1fr;gap:1.6rem;}
+@media(min-width:840px){.donate-grid{grid-template-columns:repeat(2,1fr);}}
 .pay-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-m);padding:1.8rem;max-width:640px;transition:border-color .25s ease, box-shadow .25s ease, transform .25s ease;}
 .pay-card.outline{border-color:var(--emerald-700);}
 .pay-card-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1.4rem;}
+.pay-tabs{display:flex;gap:.4rem;background:var(--paper-dim);border-radius:999px;padding:.3rem;margin-bottom:1.4rem;}
+.pay-tab{flex:1;background:none;border:none;border-radius:999px;padding:.55rem .8rem;font-size:.86rem;font-weight:600;color:var(--charcoal-60);transition:background .2s ease, color .2s ease;}
+.pay-tab.active{background:#fff;color:var(--emerald-800);box-shadow:0 2px 6px rgba(0,0,0,.08);}
+.pay-tab-form{display:flex;flex-direction:column;}
+.paypal-buttons-slot{min-height:45px;margin:.4rem 0 .8rem;}
 .pay-card-head h3{font-size:1.15rem;}
 .pay-badge{background:var(--emerald-800);color:var(--gold-100);font-size:.72rem;padding:.3rem .7rem;border-radius:999px;font-family:'Work Sans',sans-serif;font-weight:600;}
 .pay-badge.alt{background:var(--paper-dim);color:var(--emerald-800);}
